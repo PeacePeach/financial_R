@@ -106,6 +106,25 @@ AVGO[c(1:3, nrow(INTC)), ]
 TXN <- ren_xts(TXN, "TXN", colnames(TXN))
 TXN[c(1:3, nrow(INTC)), ]
 
+# ---TBD---
+# Selecting columns with the same name from multiple dataframes 
+# lapply(list(INTC, QCOM), function(x) grepl("Close", names(x)))
+# lapply(lapply(ls(pattern="scp"), get), function(x) x[grepl("Close$", colnames(x))])
+
+# Select the Close price only
+closePrices <- cbind(INTC$INTC.Close, QCOM$QCOM.Close, AVGO$AVGO.Close, TXN$TXN.Close)
+closePrices[c(1:3, nrow(closePrices)), ]
+class(closePrices)
+
+
+# Convert the data into dataframe
+closeDataframe <- cbind(Date = index(closePrices), data.frame(closePrices))
+rownames(closeDataframe) <- seq(1, nrow(closeDataframe), 1)
+names(closeDataframe) <- c("Date", "INTC", "QCOM", "AVGO", "TXN")
+closeDataframe %>% head(10)
+
+
+
 
 
 
