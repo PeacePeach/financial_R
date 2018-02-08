@@ -1,6 +1,6 @@
 # financial_R
 
-My financial analysis R codes based on books and online tutorials
+My R codes on financial topics and materials based on books and online tutorials.
 
 ## Sources
 * Analyzing Financial Data and Implementing Financial Models using R - [Clifford S. Ang, CFA](www.cliffordang.com)
