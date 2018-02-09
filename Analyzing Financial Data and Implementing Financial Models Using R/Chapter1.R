@@ -123,12 +123,63 @@ rownames(closeDataframe) <- seq(1, nrow(closeDataframe), 1)
 names(closeDataframe) <- c("Date", "INTC", "QCOM", "AVGO", "TXN")
 closeDataframe %>% head(10)
 
+# Normalize the data
+myData <- closeDataframe %>% 
+  mutate_at(vars(matches("[[:upper:]]$", ignore.case = FALSE)), funs(idx = ./.[1]))
+myData[c(1:3, nrow(myData)), ]
+
+# Plot the data with base graphing
+plot(x = myData$Date, 
+     y = myData$INTC_idx, 
+     type = "l", 
+     xlab = "Date", 
+     ylab = "Value of Investment ($)", 
+     col = "black",
+     lty = 1,
+     lwd = 2, 
+     main = "Value of $1 Investment in Intel, Qualcomm, Broadcom, Texas Instruments",
+     ylim = range(c(myData$INTC_idx, myData$QCOM_idx, myData$AVGO_idx)))
+
+lines(x = myData$Date, 
+      y = myData$QCOM_idx,
+      col = "blue",
+      lty = 2,
+      lwd = 1)
+
+lines(x = myData$Date,
+      y = myData$AVGO_idx,
+      col = "red",
+      lty = 1, 
+      lwd = 2)
+
+lines(x = myData$Date,
+      y = myData$TXN_idx,
+      col = "orange",
+      lty = 2, 
+      lwd = 1)
+
+abline(h = 1, lty = 1, col = "black")
+
+legend("topleft", 
+       c("INTC", "QCOM", "AVGO", "TXN"), 
+       col = c("black", "blue", "red", "orange"), 
+       lty = c(1, 2, 1, 2),
+       lwd = c(2, 1, 2, 1))
 
 
-
-
-
-
+# Plot the data with ggplot2
+myData %>% ggplot(aes(Date, INTC_idx)) +
+  geom_line() +
+  labs(x = "Date", y = "Value of Investment ($)") +
+  theme(axis.title = element_text(face = "bold", size = 13),
+        plot.title = element_text(face = "bold", size = 15, hjust = 0.5),
+        panel.background = element_rect(fill = "white"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(color = "gray"),
+        axis.line.x = element_blank())
+  
+  
 
 
 
