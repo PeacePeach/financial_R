@@ -164,7 +164,8 @@ legend("topleft",
        c("INTC", "QCOM", "AVGO", "TXN"), 
        col = c("black", "blue", "red", "orange"), 
        lty = c(1, 2, 1, 2),
-       lwd = c(2, 1, 2, 1))
+       lwd = c(2, 1, 2, 1),
+       cex = 0.8)
 
 
 # Plot the data with ggplot2
