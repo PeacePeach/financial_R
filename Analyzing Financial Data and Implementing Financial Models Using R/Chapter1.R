@@ -142,19 +142,19 @@ plot(x = myData$Date,
 
 lines(x = myData$Date, 
       y = myData$QCOM_idx,
-      col = "blue",
+      col = "dodgerblue",
       lty = 2,
       lwd = 1)
 
 lines(x = myData$Date,
       y = myData$AVGO_idx,
-      col = "red",
+      col = "#DC143C",
       lty = 1, 
       lwd = 2)
 
 lines(x = myData$Date,
       y = myData$TXN_idx,
-      col = "orange",
+      col = "coral",
       lty = 2, 
       lwd = 1)
 
@@ -162,27 +162,50 @@ abline(h = 1, lty = 1, col = "black")
 
 legend("topleft", 
        c("INTC", "QCOM", "AVGO", "TXN"), 
-       col = c("black", "blue", "red", "orange"), 
+       col = c("black", "dodgerblue", "#DC143C", "coral"), 
        lty = c(1, 2, 1, 2),
        lwd = c(2, 1, 2, 1),
        cex = 0.8)
 
 
 # Plot the data with ggplot2
-myData %>% ggplot(aes(Date, INTC_idx)) +
-  geom_line() +
+myData %>% ggplot(aes(Date)) +
+  geom_line(aes(y = INTC_idx, color = "var0"), size = 1) +
+  geom_line(aes(y = QCOM_idx, color = "var1"), size = 1) +
+  geom_line(aes(y = AVGO_idx, color = "var2"), size = 1) +
+  geom_line(aes(y = TXN_idx, color = "var3"), size = 1) +
+  geom_hline(yintercept = 1.0, color = "dimgrey") +
+  ggtitle("Value of $1 Investment in Intel, Qualcomm, Broadcom, Texas Instruments") +
   labs(x = "Date", y = "Value of Investment ($)") +
   theme(axis.title = element_text(face = "bold", size = 13),
         plot.title = element_text(face = "bold", size = 15, hjust = 0.5),
         panel.background = element_rect(fill = "white"),
         panel.grid.minor = element_blank(),
-        panel.grid.major.x = element_blank(),
-        panel.grid.major.y = element_line(color = "gray"),
-        axis.line.x = element_blank())
+        panel.grid.major = element_blank(),
+        axis.line = element_line(),
+        axis.text = element_text(size = 11),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 10),
+        legend.key = element_blank(),
+        legend.position = c(0.055, 0.85)) +
+  scale_color_manual(values = c("black", "dodgerblue", "#DC143C", "coral"), 
+                     labels = c("INTC", "QCOM", "AVGO", "TXN"))
   
-  
-
-
+# Alternative presentation 
+par(oma = c(0, 0, 3, 0))
+par(mfrow = c(2, 2))
+y.range <- range(myData[,6:9])
+plot(x = myData$Date, 
+     xlab = "", 
+     y = myData$QCOM_idx,
+     ylim = y.range,
+     ylab = "",
+     type = "l",
+     col = "gray",
+     main = "INTEL Stock")
+lines(x = myData$Date, y = myData$AVGO_idx, col = "gray")
+lines(x = myData$Date, y = myData$TXN_idx, col = "gray")
+lines(x = myData$Date, y = myData$INTC_idx, col = "black", lwd = 2)
 
 
 
