@@ -202,10 +202,65 @@ plot(x = myData$Date,
      ylab = "",
      type = "l",
      col = "gray",
-     main = "INTEL Stock")
+     main = "Intel Stock")
 lines(x = myData$Date, y = myData$AVGO_idx, col = "gray")
 lines(x = myData$Date, y = myData$TXN_idx, col = "gray")
 lines(x = myData$Date, y = myData$INTC_idx, col = "black", lwd = 2)
+abline(h=1)
+
+plot(x = myData$Date,
+     y = myData$INTC_idx,
+     xlab = "",
+     ylab = "",
+     ylim = y.range,
+     type = "l",
+     col = "gray",
+     main = "Qualcomm Stock")
+lines(x = myData$Date, y = myData$AVGO_idx, col = "gray")
+lines(x = myData$Date, y = myData$TXN_idx, col = "gray")
+lines(x = myData$Date, y = myData$QCOM_idx, col = "dodgerblue", lwd = 2)
+abline(h=1)
+
+plot(x = myData$Date, 
+     xlab = "", 
+     y = myData$QCOM_idx,
+     ylim = y.range,
+     ylab = "",
+     type = "l",
+     col = "gray",
+     main = "Broadcom Stock")
+lines(x = myData$Date, y = myData$INTC_idx, col = "gray")
+lines(x = myData$Date, y = myData$TXN_idx, col = "gray")
+lines(x = myData$Date, y = myData$AVGO_idx, col = "#DC143C", lwd = 2)
+abline(h=1)
+
+plot(x = myData$Date, 
+     xlab = "", 
+     y = myData$QCOM_idx,
+     ylim = y.range,
+     ylab = "",
+     type = "l",
+     col = "gray",
+     main = "Texas Instruments Stock")
+lines(x = myData$Date, y = myData$AVGO_idx, col = "gray")
+lines(x = myData$Date, y = myData$INTC_idx, col = "gray")
+lines(x = myData$Date, y = myData$TXN_idx, col = "coral", lwd = 2)
+abline(h=1)
+
+title(main = "Value of $1 Invested in Top Semiconductor Companies\nDecember 31, 2014 - December 31, 2017", 
+      outer = TRUE)
+
+# Alternative presentation with ggplot
+tidyData <- myData %>% 
+  select(Date, contains("_idx")) %>% 
+  gather(INTC_idx, QCOM_idx, AVGO_idx, TXN_idx, key = "Symbol", value = "Index")
+
+tidyData %>% 
+  ggplot(aes(x = Date, y = Index)) +
+  geom_line() +
+  facet_wrap(~ Symbol)
+  
+
 
 
 
