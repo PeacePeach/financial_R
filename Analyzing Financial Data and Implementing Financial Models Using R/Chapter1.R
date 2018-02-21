@@ -1,5 +1,5 @@
-library(tidyverse)
 library(tidyquant)
+library(tidyverse)
 library(Hmisc)
 
 # Import Amazon stock price data from Yahoo Finance from December 31, 2010 to December 31, 2013
@@ -22,9 +22,10 @@ amazon %>% head(15)
 amazon %>% tail(15)
 class(amazon)
 
-# -------------------------
+# -----------------------------
 # Checking the Data
-# -------------------------
+# -----------------------------
+
 # Verify that the data is complete by plotting a chart
 plot(amazon$AMZN.Close)
 
@@ -32,9 +33,10 @@ plot(amazon$AMZN.Close)
 summary(amazon)
 
 
-# -------------------------
+# -----------------------------
 # Basic Data Manipulation
-# -------------------------
+# -----------------------------
+
 # a) Subsetting using dates
 # --> Data is an xts object
 xts.2012 <- subset(amazon$AMZN.Close, index(amazon) >= "2012-01-01" & index(amazon) <= "2012-12-31")
@@ -77,9 +79,10 @@ amzn_OHLC[c(1:3, nrow(amzn_OHLC)), ]
 chartSeries(amzn_OHLC, theme = "white.mono", name = "AMZN OHLC")
 
 
-# -------------------------
+# -----------------------------
 # Comparing Capital Gains
-# -------------------------
+# -----------------------------
+
 # Download 4 new data set of semiconductor companies
 INTC <- tq_get("INTC", get = "stock.prices", from = "2014-12-31", to = "2018-01-01")
 QCOM <- tq_get("QCOM", get = "stock.prices", from = "2014-12-31", to = "2018-01-01")
@@ -259,7 +262,58 @@ tidyData %>%
   ggplot(aes(x = Date, y = Index)) +
   geom_line() +
   facet_wrap(~ Symbol)
-  
+
+
+# -----------------------------
+# Technical Analysis Examples
+# -----------------------------
+
+# Technical analysis is the use of charts to study stock price and volume data for the purpose of forecasting trends.
+# 3 groups of technical indicators:
+#   (a) trend indicator      --> moving average
+#   (b) volatility indicator --> Bollinger Bands
+#   (c) momentum indicattor  --> relative strength index
+
+# ----Simple Moving Average Crossover----
+# Also known as SMA crossover.
+# "simple" because we treat all days equally, regardless of how near or far those days are from the present. 
+# "crossover" because we will use two SMA lines, a shorter-term and a longer-term, and make trade decisions when
+# the line crosses. 
+
+# Download Maybank stock price from 2017 to 2018
+MYB <- tq_get("1155.KL", get = "stock.prices", from = "2016-01-01", to = "2017-12-31")
+MYB %>% head()
+
+# We'll use only the closing price and use that to calculate rolling 50-day and 200-day moving average
+MYB.sma <- MYB %>% 
+  select(date, close) %>% 
+  filter(!is.na(close)) %>% 
+  mutate(sma50  = rollapply(close, FUN = mean, fill = NA, width = 50,  align = "right"),
+         sma200 = rollapply(close, FUN = mean, fill = NA, width = 200, align = "right"))
+MYB.sma %>% slice(c(45:51, 195:201))
+
+# Convert our data into an xts object
+MYB.xts <- xts(MYB.sma[,2:4], order.by = MYB.sma$date)
+
+myb.range <- range(MYB.xts, na.rm = TRUE)
+myb.range
+MYB.xts %>% summary()
+par(mfrow = c(1,1))
+plot(x = index(MYB.xts), 
+     y = MYB.xts$close, 
+     ylim = myb.range, 
+     ylab = "Price ($)",
+     xlab = "Date",
+     type = 'l',
+     main = "Maybank - Simple Moving Average\nJanuary 1, 2017 - December 31, 2017")
+lines(x = index(MYB.xts), y = MYB.xts$sma50)
+lines(x = index(MYB.xts), y = MYB.xts$sma200, lty = 2)
+legend("topleft", c("Maybank Price", "50-day Moving Average", "200-day Moving Average"), lty = c(1, 1, 2))
+
+
+
+
+
 
 
 
