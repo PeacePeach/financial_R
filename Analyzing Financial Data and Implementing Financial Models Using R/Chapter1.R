@@ -168,7 +168,7 @@ legend("topleft",
        col = c("black", "dodgerblue", "#DC143C", "coral"), 
        lty = c(1, 2, 1, 2),
        lwd = c(2, 1, 2, 1),
-       cex = 0.8)
+       cex = 0.75)
 
 
 # Plot the data with ggplot2
@@ -308,7 +308,114 @@ plot(x = index(MYB.xts),
      main = "Maybank - Simple Moving Average\nJanuary 1, 2017 - December 31, 2017")
 lines(x = index(MYB.xts), y = MYB.xts$sma50)
 lines(x = index(MYB.xts), y = MYB.xts$sma200, lty = 2)
-legend("topleft", c("Maybank Price", "50-day Moving Average", "200-day Moving Average"), lty = c(1, 1, 2))
+legend("bottomright", 
+       c("Maybank Price", "50-day Moving Average", "200-day Moving Average"), 
+       lty = c(1, 1, 2), 
+       cex = 0.75)
+
+
+# ----Volatility: Bollinger Bands----
+# A frequently used technical anlaysis volatility indicators are Bollinger Bands. 
+# 3 components of the Bollinger Bands:
+# (1) 20-day SMA
+# (2) An upper band - 2 std dev above the 20-day SMA
+# (3) A lower band - 2 std dve below the 20-day SMA
+# Bollinger Bands widen (narrow) with more (less) volatility in the stock.
+# When the bands narrow, it may be used as an indication that volatility is about to rise.
+
+# Use our Amazon data
+amazon %>% head()
+amazon.bb <- amazon[, 4]
+amazon.bb %>% head()
+
+# Calculate 20-day SMA and the standarad deviations
+amazon.bb$avg <- rollmeanr(amazon.bb$AMZN.Close, k = 20)
+amazon.bb$sd <- rollapply(amazon.bb$AMZN.Close, width = 20, FUN = sd, fill = NA)
+amazon.bb[c(1:3, nrow(amazon.bb))]
+amazon.bb[18:22,]
+
+# Subset to only show 2013 data
+amazon.bb2013 <- subset(amazon.bb, index(amazon.bb) >= "2013-01-01")
+amazon.bb2013[c(1:3, nrow(amazon.bb2013)), ]
+
+# Create the upper and lower Bollinger Band
+amazon.bb2013$sd2up <- amazon.bb2013$avg + 2 * amazon.bb2013$sd
+amazon.bb2013$sd2dn <- amazon.bb2013$avg - 2 * amazon.bb2013$sd
+amazon.bb2013[c(1:3, nrow(amazon.bb2013)), ]
+
+# Plot the Bollinger Bands
+y.bb.range <- range(amazon.bb2013[,-3], na.rm = TRUE)
+y.bb.range
+
+plot(x = index(amazon.bb2013),
+     y = amazon.bb2013$AMZN.Close,
+     xlab = "Date",
+     ylab = "Price ($)",
+     type = "l",
+     lwd = 3, 
+     main = "Amazon - Bollinger Bands (20-days sma, 2 deviations)\nJanuary 1 - December 31, 2013"
+     )
+lines(x = index(amazon.bb2013), y = amazon.bb2013$avg, lty = 2)
+lines(x = index(amazon.bb2013), y = amazon.bb2013$sd2up, col = "gray40")
+lines(x = index(amazon.bb2013), y = amazon.bb2013$sd2dn, col = "gray40")
+legend("topleft", 
+       c("Amazon Price", "20-Day Moving Average", "Upper Band", "Lower Band"),
+       lty = c(1, 2, 1, 1),
+       lwd = c(3, 1, 1, 1),
+       col = c("black", "black", "gray40", "gray40"),
+       cex = 0.75)
+
+# Now we test it out with Nestle (Malaysia) Bhd stock.
+# Download ytd data
+nestle <- tq_get("4707.KL", get = "stock.prices", from = "2016-11-01", to = "2018-01-01")
+nestle.sma <- nestle %>% 
+  filter(!is.na(close)) %>%
+  mutate(sma20 = rollapply(close, FUN = mean, width = 20, fill = NA, align = "right"),
+         sd = rollapply(close, FUN = sd, width = 20, fill = NA, align = "right"), 
+         sd2up = sma20 + 2 * sd, 
+         sd2dn = sma20 - 2 * sd)
+nestle.sma %>% slice(18:20)
+nestle.sma2017 <- nestle.sma %>% 
+  filter(date >= "2017-01-01", date < "2018-01-01")
+nestle.over <- nestle.sma2017 %>% 
+  filter(close - sd2up >= 0.7) %>% 
+  mutate(category = "overbought")
+
+nestle.under <- nestle.sma2017 %>% 
+  filter(close - sd2dn < - 0.5)%>% 
+  mutate(category = "oversold")
+
+nestle.sma2017 %>% 
+  ggplot(aes(x = date)) +
+  geom_ribbon(aes(ymin = sd2dn, ymax = sd2up), alpha = 0.3, fill = "khaki") +
+  geom_line(aes(y = close, color = "colB"), size = 1.2) + 
+  geom_line(aes(y = sma20, color = "colA"), size = 0.75) +
+  geom_line(aes(y = sd2up), linetype = "dotted", size = 0.7) +
+  geom_line(aes(y = sd2dn), linetype = "dotted", size = 0.7, color = "dimgrey") +
+  geom_text(data = nestle.under, aes(x = date + 8, y = close - 0.5, label = category), color = "mediumpurple") +
+  geom_point(data = nestle.under, aes(x = date, y = close), color = "orchid") +
+  geom_text(data = nestle.over, aes(x = date - 10, y = close + 0.5, label = category), color = "firebrick") +
+  geom_point(data = nestle.over, aes(x = date, y = close), color = "darkred") +
+  annotate(geom = "text", x = date("2017-01-01"), y = 81, label = "Upper\nBand") +
+  annotate(geom = "text", x = date("2017-01-01"), y = 74, label = "Lower\nBand") +
+  ggtitle("Bollinger Bands on Nestle (Malaysia) Bhd Stock Prices", "January 1 - December 31, 2017") +
+  labs(x ="Date", y = "Price ($)") +
+  scale_color_manual(values = c("colA" = "tomato", "colB" = "black"), labels = (c("SMA-20", "Closing Price"))) +
+  theme(plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
+        plot.subtitle = element_text(face = "bold", size = 15, hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 13),
+        axis.title.x = element_text(margin = margin(t = 20)),
+        axis.title.y = element_text(margin = margin(r = 10)),
+        panel.background = element_rect(fill = "white"),
+        panel.grid = element_blank(),
+        axis.line = element_line(),
+        axis.text = element_text(size = 13),
+        legend.title = element_blank(),
+        legend.background = element_rect(color = "black", fill = "white"),
+        legend.key = element_rect(fill = "white"),
+        legend.text = element_text(size = 12),
+        legend.position = c(0.1, 0.9))
+
 
 
 
