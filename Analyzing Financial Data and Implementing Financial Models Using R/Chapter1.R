@@ -95,6 +95,8 @@ ren_xts <- function(myData, stockName, stockColNames) {
   myCol <-  str_c(stockName, capitalize(stockColNames), sep = ".")
   colnames(myData) <- myCol
   myData <- xts(myData[, 2:7], order.by = myData[[1]])
+  
+  return(myData)
 }
 
 INTC <- ren_xts(INTC, "INTC", colnames(INTC))
@@ -415,6 +417,39 @@ nestle.sma2017 %>%
         legend.key = element_rect(fill = "white"),
         legend.text = element_text(size = 12),
         legend.position = c(0.1, 0.9))
+
+
+# ----Momentum: Relative Strength Index----
+# a) A common momentum indicator is the Relative Strength Index (RSI).
+# b) The typical calculation is to use a 14-day period. RSI = 100 - 100/(1 + RS') where RS is equal to the up average 
+#    divded by the down average with the averages calculated using the Wilder Exponential Moving Average. 
+
+# Obtain the CIMB's stoke data
+tnb <- tq_get("5347.KL", get = "stock.prices", from = "2015-01-01", to = "2017-12-31")
+
+# Create dummy variable indicating price going up or down and calculate the value change. 
+tnb.rsi <- tnb %>% select(close) %>% 
+  filter(!is.na(close)) %>% 
+  mutate(delta = close - lag(close), 
+         up = if_else(delta > 0, 1, 0),
+         down = abs(up - 1),
+         up.val = delta * up,
+         down.val = -delta * down)
+tnb.rsi
+sum(is.na(tnb.rsi))
+
+# Calculate the initial up and down 14-days averages
+tnb.rsi <- tnb.rsi %>% 
+  mutate(up.first.avg = rollapply(up.val, FUN = mean, width = 14, fill = NA, align = "right", na.rm = TRUE),
+         down.first.avg = rollapply(down.val, FUN = mean, width = 14, fill = NA, align = "right", na.rm = TRUE))
+  
+# Calculate the final Wilder Exponential Moving Average for the up and down values
+
+
+
+
+
+
 
 
 
