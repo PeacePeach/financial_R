@@ -21,7 +21,7 @@ My R codes on financial topics and materials based on books and online tutorials
 KLSE stocks symbols are not maintained as they are in Yahoo! Finance. Hence, you need to find the right symbol for the company you are interested in if you want to use the `tq_get()` function or the `getSymbols()` function. Google can easily help you with this. 
 
 Example:
-```r
+```R
 nestle <- tq_get("4707.KL", get = "stock.prices", from = "2017-01-01", to = "2018-01-01")
 ```
 
@@ -39,6 +39,6 @@ Here is a mini cheat-sheet to get you started:
 
 
 ## Sources
-* Analyzing Financial Data and Implementing Financial Models using R - [Clifford S. Ang, CFA](www.cliffordang.com)
+* Analyzing Financial Data and Implementing Financial Models using R - [Clifford S. Ang, CFA](http://www.cliffordang.com/)
 * [Tidyquant Vignettes](https://business-science.github.io/tidyquant/index.html) 
 * [Yahoo! Finance](https://finance.yahoo.com/)
